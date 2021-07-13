@@ -3,6 +3,8 @@ import random as r
 
 # Lost Hope...
 
+
+# First map 
 map_1 = {'spawn': [('east', 'm1')],
     "m1" : [('north', 'm2'), ('south', 's1a'), ('west', 'spawn')],
     "m2" : [('west', 'npc'), ('south', 'm1')],
@@ -31,17 +33,20 @@ map_1 = {'spawn': [('east', 'm1')],
     's5c' : [('south', 'k5'), ('north', 's5b')],
     'k5': [('north', 's5c')]
     }
-    
+
+# global variables for inversing directions, and keys for the different room types
 inverse_directions = {'east':'west', 'north':'south', 'west':'east', 'south':'north'}
 room_types = {'s':'split', 't':'treasure','k':'key','m':'main','d':'defender','n':'market'}
 
 
+# main board class. Contains the map, most other classes will inherit from it
 class Board:
     completed_rooms = []
     def __init__(self, map):
         self.map = map_1
         
-        
+
+# class for everything related to rooms - movement, internal generation, player interactions, and loot
 class Room(Board):
     global inverse_directions
     def __init__(self):
@@ -50,7 +55,8 @@ class Room(Board):
         self.room_type = 'spawn'
         self.previous_direction = ''
         self.paths = self.map[self.current_room]
-        
+
+    # method for moving a player from one room to the next
     @classmethod
     def movement(self):
         directions = []
@@ -64,13 +70,12 @@ class Room(Board):
         self.current_room = rooms[x]
         self.room_type = room_types[self.current_room[0]]
                 
-    
+    # generating text to tell the user their options, and to validate their choice for room movement (except for markets)
     @classmethod
     def direction_select(self, directions, rooms):
         print("Where would you like to go?")
         if len(directions) == 1 and self.current_room != 'spawn':
             print(f"You have hit a dead end so you can only go {inverse_directions[self.previous_direction]}, which is the previous room you were in")
-        
         if inverse_directions[self.previous_direction] in directions:
             print(f"You can go {inverse_directions[self.previous_direction]} which is the previous room you were in.")
             print("Your other options are ", end=' ')
@@ -80,6 +85,7 @@ class Room(Board):
             if _ != inverse_directions[self.previous_direction]:
                 print(f"{_}", end=' ')
         print("!")
+
         direction_chosen = False
         while not direction_chosen: 
             direction = input("Please choose a direction to go!\n").lower()
@@ -89,7 +95,8 @@ class Room(Board):
             else:
                 print("You did not select a valid direction, please try again!\n")
                 continue
-                
+
+        # method to control movement inside the market, and for leaving it
         @classmethod
         def market_directions(self):
             pass
