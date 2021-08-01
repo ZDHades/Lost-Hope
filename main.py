@@ -14,8 +14,8 @@ map_1 = {'spawn': [('east', 'm1')],
     "m6" : [('west', 'm7'), ('north', 'm5')],
     "m7" : [('east ', 'm6'), ('west', 's5a'), ('south', 'm8')],
     "m8" : [('north', 'm7'), ('south', 'm9')],
-    "m9" : [('north', 'm8'), ('east', 'mbd')],
-    "mbd" : [('west', 'm9')],
+    "m9" : [('north', 'm8'), ('east', 'd')],
+    "d" : [('west', 'm9')],
     "s1a" : [('south', 'k1'), ('north','m1')],
     'k1' : [('north', 's1a')],
     "s2a" : [('south', 'npc'), ('north', 's2b')],
@@ -75,9 +75,9 @@ class Room(Board):
     def direction_select(self, directions, rooms):
         print("Where would you like to go?")
         if len(directions) == 1 and self.current_room != 'spawn':
-            print(f"You have hit a dead end so you can only go {inverse_directions[self.previous_direction]}, which is the previous room you were in")
+            print(f"You have hit a dead end so you can only go {inverse_directions[self.previous_direction]}, which leads to the previous room you were in")
         if inverse_directions[self.previous_direction] in directions:
-            print(f"You can go {inverse_directions[self.previous_direction]} which is the previous room you were in.")
+            print(f"You can go {inverse_directions[self.previous_direction]} which leads to the previous room you were in.")
             print("Your other options are ", end=' ')
         else:
             print("Your options are", end=' ')
@@ -100,3 +100,6 @@ class Room(Board):
         @classmethod
         def market_directions(self):
             pass
+    
+class entity(Board):
+    pass
