@@ -46,7 +46,7 @@ class Board:
         self.map = map_1
         
 
-# class for everything related to rooms - movement, internal generation, player interactions, and loot
+# class for everything related to rooms - movement, internal generation, player interactions, and loot 
 class Room(Board):
     global inverse_directions
     def __init__(self):
@@ -101,5 +101,5 @@ class Room(Board):
         def market_directions(self):
             pass
     
-class entity(Board):
-    pass
+# class entity(Board):
+#     pass
