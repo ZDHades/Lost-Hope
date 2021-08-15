@@ -145,68 +145,68 @@ class Board():
         print(f'You have beaten the Forgotten Labrynth at level {player.get_skill()}! Congratulations!')
 
 
-def generate_room(self):
-    if self.current_room in self.completed_rooms:
-        print("You have already defeated all of the enemies in this room.")
-        print("Try to conserve your stamina by not visiting rooms multiple times when possible.")
-        return False
-    elif self.room_type == 'key' and self.current_room not in self.completed_rooms:
-        print()
-        print("You arrive in a room, adorned on the walls are severals vases with ornate drawings on them.")
-        print(f"In the center of the room there is a glass display and inside lies a {color.YELLOW}golden key{color.END}.")
-        print("With each step, as you walk closer to the display, the glass cracks a little more.")
-        print("By the time you arrive to the display, the display shatters and the key floats into your hands")
-        print("The room darkens and you hear a rumble from afar and a cold breeze passes over you.")
-        player.keys += 1
-        Equipment.create_item(player.get_skill() + 1)
-        if player.keys == 1:
-            print("There is silence for a moment, then you hear a shriek...")
-            Intro.slow_print(f'{color.RED}{color.BOLD}WHO DARES{color.END}', .1)
-        elif player.keys == 2:
-            print(f"{color.RED}Deities of the underworld, grant us a champion to fight for us!")
-        elif player.keys ==3:
-            print(f"{color.RED}Rise my friends...{color.BOLD}AND STRIKE THEM DOWN!")
-        return False
-        
-    elif self.room_type == 'split' or self.room_type == 'main' and self.current_room not in self.completed_rooms:
-        minions = ['Lost Crusade', 'Grotto Slime', 'Henchmen of Malus', 'Tormented Golems', 'Spectral Sentry']
-        minion = r.choice(minions)
-        enemy = Minions(minion)
-        enemy.get_skill()
-        if player.get_skill() >= enemy.get_skill():
-            enemy.fight_me()
-            Equipment.create_item(player.get_skill())
+    def generate_room(self):
+        if self.current_room in self.completed_rooms:
+            print("You have already defeated all of the enemies in this room.")
+            print("Try to conserve your stamina by not visiting rooms multiple times when possible.")
             return False
-        else:
-            enemy.not_ready()
-            return True
-    elif self.room_type == 'market' and self.current_room not in self.completed_rooms:
-        if player.fatigue <= 10:
-            print("Not sure what to do with this yet...")
-    elif self.room_type == 'defender' and self.current_room not in self.completed_rooms:
-        Marble_Defender.fight_me()
-        if 'Cultist of Malus' in Enemies.defeated_enemies:
-            print("From the crumbled remains of the Marble Defender, a small portal appears, and from within you")
-            print("the strange gas from the Cultist flows out and gets absorbed into the portal, causing it to")
-            print("grow...strangely just large enough for you to comfortably step inside...and stupidly...you do")
-            win = Void.fight_me()
-            if win == True:
-                board.completed()
-            return True
-    elif self.room_type == 'treasure' and self.current_room not in self.completed_rooms:
-        if player.keys >= 3:
-            print(repr(Cultist_of_Malus()))
-            defeated = Cultist_of_Malus.fight_me()
-            if defeated == False:
-                print("From the robes of the Cultist, a strange purple vial falls out and cracks on the floor")
-                print("The vial shatters and a purple gas slowly rises up and as if with sentience,")
-                print("the gas flows towards you. Stupified, you stand there unable to move as it embraces you.")
-                print("It seems to get absorbed into your skin, and assuming there is nothing you can do about it")
-                print("You continue onwards...")
+        elif self.room_type == 'key' and self.current_room not in self.completed_rooms:
+            print()
+            print("You arrive in a room, adorned on the walls are severals vases with ornate drawings on them.")
+            print(f"In the center of the room there is a glass display and inside lies a {color.YELLOW}golden key{color.END}.")
+            print("With each step, as you walk closer to the display, the glass cracks a little more.")
+            print("By the time you arrive to the display, the display shatters and the key floats into your hands")
+            print("The room darkens and you hear a rumble from afar and a cold breeze passes over you.")
+            player.keys += 1
+            Equipment.create_item(player.get_skill() + 1)
+            if player.keys == 1:
+                print("There is silence for a moment, then you hear a shriek...")
+                Intro.slow_print(f'{color.RED}{color.BOLD}WHO DARES{color.END}', .1)
+            elif player.keys == 2:
+                print(f"{color.RED}Deities of the underworld, grant us a champion to fight for us!")
+            elif player.keys ==3:
+                print(f"{color.RED}Rise my friends...{color.BOLD}AND STRIKE THEM DOWN!")
+            return False
+            
+        elif self.room_type == 'split' or self.room_type == 'main' and self.current_room not in self.completed_rooms:
+            minions = ['Lost Crusade', 'Grotto Slime', 'Henchmen of Malus', 'Tormented Golems', 'Spectral Sentry']
+            minion = r.choice(minions)
+            enemy = Minions(minion)
+            enemy.get_skill()
+            if player.get_skill() >= enemy.get_skill():
+                enemy.fight_me()
+                Equipment.create_item(player.get_skill())
                 return False
-        else:
-            Cultist_of_Malus.not_ready()
-            return False
+            else:
+                enemy.not_ready()
+                return True
+        elif self.room_type == 'market' and self.current_room not in self.completed_rooms:
+            if player.fatigue <= 10:
+                print("Not sure what to do with this yet...")
+        elif self.room_type == 'defender' and self.current_room not in self.completed_rooms:
+            Marble_Defender.fight_me()
+            if 'Cultist of Malus' in Enemies.defeated_enemies:
+                print("From the crumbled remains of the Marble Defender, a small portal appears, and from within you")
+                print("the strange gas from the Cultist flows out and gets absorbed into the portal, causing it to")
+                print("grow...strangely just large enough for you to comfortably step inside...and stupidly...you do")
+                win = Void.fight_me()
+                if win == True:
+                    board.completed()
+                return True
+        elif self.room_type == 'treasure' and self.current_room not in self.completed_rooms:
+            if player.keys >= 3:
+                print(repr(Cultist_of_Malus()))
+                defeated = Cultist_of_Malus.fight_me()
+                if defeated == False:
+                    print("From the robes of the Cultist, a strange purple vial falls out and cracks on the floor")
+                    print("The vial shatters and a purple gas slowly rises up and as if with sentience,")
+                    print("the gas flows towards you. Stupified, you stand there unable to move as it embraces you.")
+                    print("It seems to get absorbed into your skin, and assuming there is nothing you can do about it")
+                    print("You continue onwards...")
+                    return False
+            else:
+                Cultist_of_Malus.not_ready()
+                return False
 
 class Enemies():
     defeated_enemies = []
