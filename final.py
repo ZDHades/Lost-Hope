@@ -174,7 +174,7 @@ class Board():
             enemy.get_skill(player, self)
             if player.get_skill(self) >= enemy.get_skill(player, self):
                 enemy.fight_me(player, self)
-                Equipment.create_item(player.get_skill(self), player)
+                # Equipment.create_item(player.get_skill(self), player)
                 return False
             else:
                 enemy.not_ready()
@@ -387,7 +387,7 @@ class Minions(Enemies):
     def not_ready(self):
 #         print(repr(self()))
         print(f"As you step into the room, the heads of a dozen {self.name} turns to face you.")
-        print("With a look of fierce malus, their eyes lock onto yours, you sense no mercy in them.")
+        print("With a look of fierce malice, their eyes lock onto yours, you sense no mercy in them.")
         print("As if answering to a war cry, they all rush at you.")
         print("Your legs get caught in the dusty bones of a creature and you trip...")
         print("As you die, your last words were 'AHHHHHHHHHHHH', so valiant...A hero to remember.")
@@ -582,6 +582,7 @@ class Play:
         board = Board(map_1)
         player = Player()
         player.set_up_player()
+        Equipment.on_floor.clear()
         # intro_done = Intro.show_intro()
         # if intro_done == False:
             # return "Bye"
@@ -589,8 +590,8 @@ class Play:
         while not quit_or_dead:
             # sys('clear')
             print(repr(board))
-            if board.current_room not in board.no_item_rooms():
-                Equipment.create_item(player.get_skill(board), player)
+            # if board.current_room not in board.no_item_rooms():
+                # Equipment.create_item(player.get_skill(board), player)
             quit_or_dead = board.movement(player)
             if quit_or_dead == True:
                 continue
