@@ -2,6 +2,7 @@ from os import system as sys
 from time import sleep as s
 import random as r
 
+
 map_1 = {'entrance': [('east', 'm1')],
     "m1" : [('north', 'm2'), ('south', 's1a'), ('west', 'entrance')],
     "m2" : [('west', 'npc'), ('south', 'm1')],
@@ -66,7 +67,6 @@ class color:
    END = '\033[0m'
 
 
-
 class Board():
     room_types = {'s':'split', 't':'treasure','k':'key','m':'main','d':'defender','n':'market', 'e': 'entrance'}
     completed_rooms = []
@@ -87,7 +87,7 @@ class Board():
         print(display.format(left = 'Ability', right = 'Spell'))
         return '='*40
         
-    def movement(self):
+    def movement(self, player):
         directions = []
         rooms = []
         paths = self.map[self.current_room]
@@ -97,7 +97,7 @@ class Board():
         direction = self.direction_select(directions, rooms)
         self.previous_direction = direction
         if self.previous_direction == 'quit':
-            print(f"Thank you for playing, your skill was {player.get_skill()}!")
+            print(f"Thank you for playing, your skill was {player.get_skill(self)}!")
             return True
         x = directions.index(direction)
         if self.current_room not in self.completed_rooms:
@@ -130,7 +130,7 @@ class Board():
         no_item_rooms = ['entrance', 'Treasure', 'k1', 'k2', 'k3', 'k4', 'k5', 'd'] + self.completed_rooms
         return no_item_rooms
     
-    def complete(self):
+    def complete(self, player):
         print("There is a small rumble, and from within the arena purple smoke flows out to form a portal in front of you")
         print("With confidence, you step through, and find yourself at the entrance of the Forgotten Labrynth...")
         print("In front of you, you see...yourself...jumping into the Labrynth, as the doors shut behind yourself")
@@ -142,10 +142,9 @@ class Board():
         print("In the morning, you awake with renewed energy, ready to begin your travel to the Captial.")
         s(1)
         print("You knew that when you arrived, you would be the hero that the world had been waiting a millena for...")
-        print(f'You have beaten the Forgotten Labrynth at level {player.get_skill()}! Congratulations!')
-
-
-    def generate_room(self):
+        print(f'You have beaten the Forgotten Labrynth at level {player.get_skill(self)}! Congratulations!')
+        
+    def generate_room(self, player):
         if self.current_room in self.completed_rooms:
             print("You have already defeated all of the enemies in this room.")
             print("Try to conserve your stamina by not visiting rooms multiple times when possible.")
@@ -158,7 +157,7 @@ class Board():
             print("By the time you arrive to the display, the display shatters and the key floats into your hands")
             print("The room darkens and you hear a rumble from afar and a cold breeze passes over you.")
             player.keys += 1
-            Equipment.create_item(player.get_skill() + 1)
+            Equipment.create_item(player.get_skill(self) + 1, player)
             if player.keys == 1:
                 print("There is silence for a moment, then you hear a shriek...")
                 Intro.slow_print(f'{color.RED}{color.BOLD}WHO DARES{color.END}', .1)
@@ -167,36 +166,37 @@ class Board():
             elif player.keys ==3:
                 print(f"{color.RED}Rise my friends...{color.BOLD}AND STRIKE THEM DOWN!")
             return False
-            
+
         elif self.room_type == 'split' or self.room_type == 'main' and self.current_room not in self.completed_rooms:
-            minions = ['Lost Crusade', 'Grotto Slime', 'Henchmen of Malus', 'Tormented Golems', 'Spectral Sentry']
+            minions = ['Lost Crusade', 'Grotto Slime', 'Henchmen of Malu', 'Tormented Golem', 'Spectral Sentry']
             minion = r.choice(minions)
             enemy = Minions(minion)
-            enemy.get_skill()
-            if player.get_skill() >= enemy.get_skill():
-                enemy.fight_me()
-                Equipment.create_item(player.get_skill())
+            enemy.get_skill(player, self)
+            if player.get_skill(self) >= enemy.get_skill(player, self):
+                enemy.fight_me(player, self)
+                Equipment.create_item(player.get_skill(self), player)
                 return False
             else:
                 enemy.not_ready()
                 return True
         elif self.room_type == 'market' and self.current_room not in self.completed_rooms:
             if player.fatigue <= 10:
+                Equipment.create_item(player.get_skill(self), player)
                 print("Not sure what to do with this yet...")
         elif self.room_type == 'defender' and self.current_room not in self.completed_rooms:
-            Marble_Defender.fight_me()
+            Marble_Defender.fight_me(player, self)
             if 'Cultist of Malus' in Enemies.defeated_enemies:
                 print("From the crumbled remains of the Marble Defender, a small portal appears, and from within you")
                 print("the strange gas from the Cultist flows out and gets absorbed into the portal, causing it to")
                 print("grow...strangely just large enough for you to comfortably step inside...and stupidly...you do")
-                win = Void.fight_me()
+                win = Void.fight_me(player, self)
                 if win == True:
-                    board.completed()
+                    self.completed(player)
                 return True
         elif self.room_type == 'treasure' and self.current_room not in self.completed_rooms:
             if player.keys >= 3:
                 print(repr(Cultist_of_Malus()))
-                defeated = Cultist_of_Malus.fight_me()
+                defeated = Cultist_of_Malus.fight_me(player, self)
                 if defeated == False:
                     print("From the robes of the Cultist, a strange purple vial falls out and cracks on the floor")
                     print("The vial shatters and a purple gas slowly rises up and as if with sentience,")
@@ -234,7 +234,7 @@ class Cultist_of_Malus(Enemies):
         print("With rightful caution, you choose to not touch them.")
     
     @classmethod
-    def fight_me(self):
+    def fight_me(self, player, board):
         print(repr(self()))
         print(f"{color.RED}Azamoth, we require the assistance of another warrior so that we may bring glory to you!{color.END}")
         s(1)
@@ -245,12 +245,12 @@ class Cultist_of_Malus(Enemies):
         if player.get_combat_skill() > self.skill:
             print(f"""{color.RED}{color.BOLD}Even if you are victorious...
             that…that THING still crawls in the halls! You make an irredeemable mistake by defeating the only people keeping it suppressed!{color.END}""")
-            Equipment.create_item(player.get_skill() + 5)
+            Equipment.create_item(player.get_skill(board) + 5, player)
             Enemies.defeated_enemies.append(self.name)
             return False
         else:
             print(f"{color.RED}Ha...hahah...You never stood a chance...{color.END}")
-            print(f"You have died at level {player.get_skill()} to the Cultist of Malus")
+            print(f"You have died at level {player.get_skill(board)} to the Cultist of Malus")
             return True
 
         
@@ -263,7 +263,7 @@ class Marble_Defender(Enemies):
         self.defense = self.skill * 3
     
     @classmethod
-    def fight_me(self):
+    def fight_me(self, player, board):
         print(repr(self()))
         print(f"{color.BOLD}You know not what awaits behind this wall. Please, turn back before you regret your actions.{color.END}")
         s(1)
@@ -273,15 +273,15 @@ class Marble_Defender(Enemies):
         s(1)
         print(f"{color.BOLD}Do not allow this evil to escape...{color.END}")
         s(1)        
-        if player.get_skill() >= self.skill:
+        if player.get_skill(board) >= self.skill:
             print(f"{color.BOLD}I can protect your world no longer...the fate of the world is now in your hands...{color.END}")
-            Equipment.create_item(player.get_skill()+1)
+            Equipment.create_item(player.get_skill(board)+1, player)
             Enemies.defeated_enemies.append(self.name)
             return False
         else:
             print(f"My condolences, young hero...but for the sake of the world, you could not be allowed to proceed")
             s(1)
-            print(f"You have died at level {player.get_skill()} to the marble defender...")
+            print(f"You have died at level {player.get_skill(board)} to the marble defender...")
             return True
 
 class Void(Enemies):
@@ -293,7 +293,7 @@ class Void(Enemies):
         self.defense = self.skill * 3
     
     @classmethod
-    def fight_me(self):
+    def fight_me(self, player, board):
         print(repr(self()))
         print("You enter into a large room, resembling sort of a battle arena.")
         print("You hear a deep voice from all around you, as if the air itself was speaking")
@@ -369,7 +369,7 @@ ALL UNDER MY CONTROL!
             print("It readies a massive arrow, and you feel only dread. You regret all of your choices to this point")
             print("The arrow fires, and tears you right in two...")
             print("The entity snorts, annoyed at having wasted time to present itself to you")
-            print(f"You have died at level {player.get_skill()} to the void entity...")
+            print(f"You have died at level {player.get_skill(board)} to the void entity...")
             return False
 class Minions(Enemies):
     def __init__(self, name):
@@ -379,28 +379,28 @@ class Minions(Enemies):
         self.health = self.skill * 7
         self.defense = self.skill * 3
     
-    def get_skill(self):
+    def get_skill(self, player, board):
         skill_diff = r.randint(-2, 2)
-        self.skill = player.get_skill() + skill_diff
+        self.skill = player.get_skill(board) + skill_diff
         return self.skill
     
     def not_ready(self):
-        print(repr(self()))
-        print("As you step into the room, the heads of a dozen enemies turns to face you.")
+#         print(repr(self()))
+        print(f"As you step into the room, the heads of a dozen {self.name} turns to face you.")
         print("With a look of fierce malus, their eyes lock onto yours, you sense no mercy in them.")
         print("As if answering to a war cry, they all rush at you.")
         print("Your legs get caught in the dusty bones of a creature and you trip...")
         print("As you die, your last words were 'AHHHHHHHHHHHH', so valiant...A hero to remember.")
-    def fight_me(self):
-        print(repr(self()))
+    def fight_me(self, player, board):
+#         print(repr(self()))
         print(f"You walk into a room full {self.name}s")
         print("With a determined look, you ready your staff, bellow with bravery and charge at the opposition")
         print("In no time, you have decimated the lot of them, and from the center of the room decends an object\nwrapped in a silk cloth")
-        Equipment.create_item(player.get_skill())
+        Equipment.create_item(player.get_skill(board), player)
         if self.name not in Enemies.defeated_enemies:
             Enemies.defeated_enemies.append(self.name)
         
-
+        
 class Player():
     def __init__(self):
         self.inventory = []
@@ -465,7 +465,7 @@ class Player():
         self.inventory.pop(n)
         return True
     
-    def get_skill(self):
+    def get_skill(self, board):
         self.skill = len(board.completed_rooms) *4 - self.fatigue + 2
 #         if every enemy is defeated, skill + 3
 #         if completed rooms too high, skill - 5
@@ -473,14 +473,14 @@ class Player():
     
     def get_combat_skill(self):
         x = 0
-        for item in player.inventory:
+        for item in self.inventory:
             x += item.tier
         self.combat_skill = x
         return self.combat_skill
     
     def set_up_player(self):
         self.inventory = [Staff(1), Spell(1), Robe(1), Ring(1)]
-        name = input("What is your name?\n").lower
+        name = input("What is your name?\n").lower()
         self.name = name
 
 class Equipment():
@@ -494,7 +494,7 @@ class Equipment():
         return "#"*40
     
     @classmethod
-    def create_item(self, skill):
+    def create_item(self, skill, player):
         potential_drops = [Ring(skill), Staff(skill), Spell(skill), Robe(skill)]
         drop = r.choice(potential_drops)
         self.on_floor.append(drop)
@@ -572,30 +572,31 @@ class Intro():
                 print("Thank you for coming! Hope you get a chance to play sometime soon.")
                 return False
             else:
-#                 self.slow_print(intro, 0.05)
-#                 s(5)
+                self.slow_print(intro, 0.05)
+                s(5)
                 return True
-
+    
 class Play:
     def game():
         rmap = map_1 #When there are multiple maps, we will randomly choose a map here
         board = Board(map_1)
         player = Player()
         player.set_up_player()
-        intro_done = Intro.show_intro()
-        if intro_done == False:
-            return "Bye"
+        # intro_done = Intro.show_intro()
+        # if intro_done == False:
+            # return "Bye"
         quit_or_dead = False
         while not quit_or_dead:
-            sys('clear')
+            # sys('clear')
             print(repr(board))
             if board.current_room not in board.no_item_rooms():
-                Equipment.create_item(player.get_skill())
-            quit_or_dead = board.movement()
+                Equipment.create_item(player.get_skill(board), player)
+            quit_or_dead = board.movement(player)
             if quit_or_dead == True:
                 continue
-            quit_or_dead = board.generate_room()
-        print(f"Thank you for playing {color.UNDERLINE}Lost Hope{color.END} a text based adventure game")
+            quit_or_dead = board.generate_room(player)
+        print(f"Thank you for playing {color.UNDERLINE}Lost Hope{color.END} a text based adventure game,")
         print("By Nisarg Patel")
+
 
 Play.game()
